@@ -24,49 +24,49 @@
                       :type :box
                       :value (:value attrs)})))))))
 
-(defn create-pre-model
+(defn create-catalog
+  "Create a catalog for the model and differentiate between
+   input, function and output."
   ([model-step source target]
-   {:workflow (map (fn [t] [(keyword (:value model-step)) (keyword (:value t))]) target)
-    :catalog {:witan/name (keyword (:value model-step))
-              :witan/version "1.0.0"
-              :witan/type :function
-              :witan/fn (keyword (str "model/" (:value model-step)))}})
+   {:witan/name (keyword (:value model-step))
+    :witan/version "1.0.0"
+    :witan/type :function
+    :witan/fn (keyword (str "model/" (:value model-step)))})
   ([model-step target]
-   {:workflow (map (fn [t] [(keyword (:value model-step)) (keyword (:value t))]) target)
-    :catalog {:witan/name (keyword (:value model-step))
-              :witan/version "1.0.0"
-              :witan/type :output
-              :witan/fn (keyword (str "model/" (:value model-step)))}})
+   {:witan/name (keyword (:value model-step))
+    :witan/version "1.0.0"
+    :witan/type :output
+    :witan/fn (keyword (str "model/" (:value model-step)))})
   ([model-step]
-   {:catalog {:witan/name (keyword (:value model-step))
-              :witan/version "1.0.0"
-              :witan/type :input
-              :witan/fn (keyword (str "model/" (:value model-step)))
-              :witan/params {:src ""}}}))
+   {:witan/name (keyword (:value model-step))
+    :witan/version "1.0.0"
+    :witan/type :input
+    :witan/fn (keyword (str "model/" (:value model-step)))
+    :witan/params {:src ""}}))
 
-(defn add-model-metadata
+(defn create-pre-model
   [model-elements]
   (let [boxes (filter (fn [{:keys [type]}] (= type :box)) model-elements)
         arrows (filter (fn [{:keys [type]}] (= type :arrow)) model-elements)
+        ;; Lookup the value of a box from its ids, and create a keyword:
+        lookup-box (fn [id] (keyword (:value (first (filter #(= id (:id %)) boxes)))))
         links {:from (group-by :from arrows) :to (group-by :to arrows)}]
-    (mapv (fn [box] (let [f (get (:from links) (:id box))
-                          t (get (:to links) (:id box))]
-                      (cond
-                        (and (not-empty f) (not-empty t)) (create-pre-model box f t)
-                        (and (empty? f) (not-empty t)) (create-pre-model box t)
-                        (and (not-empty f) (empty? t)) (create-pre-model box))))
-          boxes)))
 
-(defn create-workflow
-  [model-metadata]
-  (vec (keep :workflow model-metadata)))
+    {:workflow (mapv (fn [{:keys [from to]}]
+                       [(lookup-box from) (lookup-box to)])
+                     arrows)
 
-(defn create-catalog
-  [model-metadata]
-  (vec (keep :catalog model-metadata)))
+     :catalog (mapv (fn [box] (let [f (get (:from links) (:id box))
+                                    t (get (:to links) (:id box))]
+                                (cond
+                                  (and (not-empty f) (not-empty t)) (create-catalog box f t)
+                                  (and (empty? f) (not-empty t)) (create-catalog box t)
+                                  (and (not-empty f) (empty? t)) (create-catalog box))))
+                    boxes)}))
 
 (comment
 
-  (clojure.pprint/pprint (parse-xml-model "dev-resources/test-model.xml"))
+  (clojure.pprint/pprint (parse-xml-model "dev-resources/test-diagram.xml"))
 
-  (add-model-metadata (parse-xml-model "dev-resources/test-model.xml")))
+  (clojure.pprint/pprint
+   (create-pre-model (parse-xml-model "dev-resources/test-diagram.xml"))))

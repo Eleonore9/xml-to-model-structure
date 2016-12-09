@@ -1,32 +1,47 @@
 # parse-xml
 
-FIXME: description
+## Aim
 
-## Installation
+To create a model diagram using [draw.io](https://www.draw.io/) export it as an XML file and create a structure for a model to be run on the [workspace-executor](https://github.com/MastodonC/witan.workspace-executor) using tools from the [workspace-api](https://github.com/MastodonC/witan.workspace-api), just like other models written for Witan like:
 
-Download from http://example.com/FIXME.
+* [witan.models.demography](https://github.com/MastodonC/witan.models.demography)
+* [witan.models.household](https://github.com/MastodonC/witan.models.household)
+* [witan.gwyn](https://github.com/MastodonC/witan.gwyn)
 
-## Usage
 
-FIXME: explanation
+## Status
 
-    $ java -jar parse-xml-0.1.0-standalone.jar [args]
+Produces a pre model for a basic diagram
 
-## Options
+[!basic-model-diagram](img/test-diagram.svg)
 
-FIXME: listing of options this app accepts.
+From the repl run
 
-## Examples
+```Clojure
+(clojure.pprint/pprint
+   (create-pre-model
+      (parse-xml-model "dev-resources/test-diagram.xml")))
+```
 
-...
+And output a data structure containing the model workflow (steps of the model), and catalog (metadata for each step of the model)
 
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+```Clojure
+{:workflow [[:in :fn] [:fn :out]],
+ :catalog
+ [{:witan/name :in,
+   :witan/version "1.0.0",
+   :witan/type :input,
+   :witan/fn :model/in,
+   :witan/params {:src ""}}
+  {:witan/name :fn,
+   :witan/version "1.0.0",
+   :witan/type :function,
+   :witan/fn :model/fn}
+  {:witan/name :out,
+   :witan/version "1.0.0",
+   :witan/type :output,
+   :witan/fn :model/out}]}
+```
 
 ## License
 
