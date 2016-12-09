@@ -13,7 +13,7 @@ To create a model diagram using [draw.io](https://www.draw.io/) export it as an 
 
 Produces a pre model for a basic diagram
 
-[!basic-model-diagram](img/test-diagram.svg)
+![basic-model-diagram](img/test-diagram.svg)
 
 From the repl run
 
