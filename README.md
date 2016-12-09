@@ -1,5 +1,7 @@
 # parse-xml
 
+[![Build Status](https://travis-ci.org/Eleonore9/xml-to-model-structure.svg?branch=master)](https://travis-ci.org/Eleonore9/xml-to-model-structure)
+
 ## Aim
 
 To create a model diagram using [draw.io](https://www.draw.io/) export it as an XML file and create a structure for a model to be run on the [workspace-executor](https://github.com/MastodonC/witan.workspace-executor) using tools from the [workspace-api](https://github.com/MastodonC/witan.workspace-api), just like other models written for Witan like:
