@@ -1,8 +1,18 @@
 (ns parse-xml.core
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
+            [clojure.string :as s]
             [witan.workspace-api :refer [defmodel]])
   (:gen-class))
+
+(defn clean-text [text]
+  (-> text
+      (s/trim)
+      (s/lower-case)
+      (s/replace #"<(\w+)>" " ")
+      (s/trim)
+      (s/replace #"[.()_]" "-")
+      (s/replace #" " "-")))
 
 (defn parse-xml-model
   "Gets in an xml file. Returns a list of maps
@@ -23,7 +33,7 @@
                       :to (:target attrs)}
                      {:id (:id attrs)
                       :type :box
-                      :value (:value attrs)})))))))
+                      :value (clean-text (:value attrs))})))))))
 
 (defn create-catalog
   "Create a catalog for the model and differentiate between

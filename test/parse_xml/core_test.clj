@@ -9,7 +9,13 @@
                   {:id "3", :type :box, :value "fn"}
                   {:id "4", :type :box, :value "out"}
                   {:id "5", :type :arrow, :from "2", :to "3"}
-                  {:id "6", :type :arrow, :from "3", :to "4"}))))))
+                  {:id "6", :type :arrow, :from "3", :to "4"}))))
+    (is (= (set (parse-xml-model "dev-resources/test-diagram2.xml"))
+           (set '({:id "2" :type :box :value "input"}
+                  {:id "4" :type :box :value "step"}
+                  {:id "6" :type :box :value "output"}
+                  {:id "3" :type :arrow :from "2" :to "4"}
+                  {:id "5" :type :arrow :from "4" :to "6"}))))))
 
 (deftest create-pre-model-test
   (testing "The pre-model contains valid workflow and catalog"
