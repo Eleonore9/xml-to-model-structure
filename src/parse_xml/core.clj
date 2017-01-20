@@ -61,7 +61,13 @@
         arrows (filter (fn [{:keys [type]}] (= type :arrow)) model-elements)
         ;; Lookup the value of a box from its ids, and create a keyword:
         lookup-box (fn [id] (keyword (:value (first (filter #(= id (:id %)) boxes)))))
-        links {:from (group-by :from arrows) :to (group-by :to arrows)}]
+        links {:from (group-by :from arrows) :to (group-by :to arrows)}
+        ;; Look for disconnected arrows
+        disc-arrows (keep #(when (or (nil? (:from %)) (nil? (:to %))) %) arrows)]
+
+    (when (not-empty disc-arrows) (println (str "DANGER! The flowchart has "
+                                                (count disc-arrows)
+                                                " disconnected arrows!\nYou CANNOT proceed with creating a model! Go fix your diagram first")))
 
     {:workflow (mapv (fn [{:keys [from to]}]
                        [(lookup-box from) (lookup-box to)])
