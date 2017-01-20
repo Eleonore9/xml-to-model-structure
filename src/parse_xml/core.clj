@@ -1,6 +1,7 @@
 (ns parse-xml.core
   (:require [clojure.java.io :as io]
-            [clojure.data.xml :as xml])
+            [clojure.data.xml :as xml]
+            [witan.workspace-api :refer [defmodel]])
   (:gen-class))
 
 (defn parse-xml-model
@@ -64,9 +65,32 @@
                                   (and (not-empty f) (empty? t)) (create-catalog box))))
                     boxes)}))
 
+(defn create-model-workflow [pre-model]
+  (:workflow pre-model))
+
+(defn create-model-catalog [pre-model]
+  (:catalog pre-model))
+
+;; (defn create-model [workflow catalog model-name ns-name]
+;;   (defmodel model-name
+;;     "Defines the model"
+;;     {:witan/name (keyword (str ns-name "/" model-name))
+;;      :witan/version "1.0.0"}
+;;     {:workflow workflow
+;;      :catalog catalog}))
+
+
 (comment
 
   (clojure.pprint/pprint (parse-xml-model "dev-resources/test-diagram.xml"))
 
-  (clojure.pprint/pprint
-   (create-pre-model (parse-xml-model "dev-resources/test-diagram.xml"))))
+  (-> (parse-xml-model "dev-resources/test-diagram.xml")
+      create-pre-model
+      clojure.pprint/pprint)
+
+  (def pre-model (create-pre-model (parse-xml-model "dev-resources/test-diagram.xml")))
+
+  (def catalog (create-model-catalog pre-model))
+  (def workflow (create-model-workflow pre-model))
+  ;;(create-model workflow catalog "test-model" "test-ns")
+  )
