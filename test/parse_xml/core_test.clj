@@ -18,21 +18,23 @@
                   {:id "5" :type :arrow :from "4" :to "6"}))))))
 
 (deftest create-pre-model-test
-  (testing "The pre-model contains valid workflow and catalog"
-    (let [parsed-xml (parse-xml-model "dev-resources/test-diagram.xml")
-          pre-model (create-pre-model parsed-xml)]
+  (testing "The function creates a map containing a workflow and a catalog"
+    (let [pre-model (create-pre-model (parse-xml-model "dev-resources/test-diagram5.xml"))]
+      (is (= (set (keys pre-model)) #{:workflow :catalog}))
       (is (= pre-model
-             {:catalog [{:witan/name :in
-                         :witan/version "1.0.0"
-                         :witan/type :input
-                         :witan/fn :model/in
-                         :witan/params {:src ""}}
-                        {:witan/name :fn
-                         :witan/version "1.0.0"
-                         :witan/type :function
-                         :witan/fn :model/fn}
-                        {:witan/name :out
-                         :witan/version "1.0.0"
-                         :witan/type :output
-                         :witan/fn :model/out}]
-              :workflow [[:in :fn] [:fn :out]]})))))
+             {:workflow [[:input-dataset :group-by-year]
+                         [:group-by-year :output-new-dataset]]
+              :catalog [{:witan/name :input-dataset :witan/version "1.0.0"
+                         :witan/type :input :witan/fn :model/input-dataset :witan/params {:src ""}}
+                        {:witan/name :group-by-year :witan/version "1.0.0"
+                         :witan/type :function :witan/fn :model/group-by-year}
+                        {:witan/name :output-new-dataset :witan/version "1.0.0"
+                         :witan/type :output :witan/fn :model/output-new-dataset}]}))))
+  (testing "An exception is thrown when the model diagram is broken"
+    (is (thrown? java.lang.Exception (create-pre-model
+                                      (parse-xml-model "dev-resources/test-diagram5-broken.xml"))))
+    (is (thrown-with-msg? java.lang.Exception
+                          #"!DANGER! The flowchart has 1 disconnected arrows.\nYou CANNOT proceed with creating a model. Go fix your diagram first!\n"
+                          (create-pre-model
+                           (parse-xml-model
+                            "dev-resources/test-diagram5-broken.xml"))))))

@@ -2,10 +2,12 @@
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
             [clojure.string :as s]
-            [witan.workspace-api :refer [defmodel]])
+            [taoensso.timbre :as timbre :refer [info]])
   (:gen-class))
 
-(defn clean-text [text]
+(defn clean-text
+  "Try and anticipate special characters in the diagram boxes."
+  [text]
   (-> text
       (s/trim)
       (s/lower-case)
@@ -18,6 +20,7 @@
   "Gets in an xml file. Returns a list of maps
   describing each element of the diagram."
   [xml-file]
+  (info "Parsing the XML from" xml-file)
   (let [model-xml (slurp (io/file xml-file))
         reader-xml (java.io.StringReader. model-xml)
         model-content (:content (xml/parse reader-xml))]
@@ -56,6 +59,8 @@
     :witan/params {:src ""}}))
 
 (defn create-pre-model
+  "Gets in a list of maps containing info for each step of the model diagram.
+   Returns a map containing the model workflow and the model catalog."
   [model-elements]
   (let [boxes (filter (fn [{:keys [type]}] (= type :box)) model-elements)
         arrows (filter (fn [{:keys [type]}] (= type :arrow)) model-elements)
@@ -65,10 +70,13 @@
         ;; Look for disconnected arrows
         disc-arrows (keep #(when (or (nil? (:from %)) (nil? (:to %))) %) arrows)]
 
-    (when (not-empty disc-arrows) (println (str "DANGER! The flowchart has "
-                                                (count disc-arrows)
-                                                " disconnected arrows!\nYou CANNOT proceed with creating a model! Go fix your diagram first")))
+    ;; When arrows are disconnected we can't create a model.
+    (when (not-empty disc-arrows)
+      (let [msg (str "!DANGER! The flowchart has " (count disc-arrows)
+                     " disconnected arrows.\nYou CANNOT proceed with creating a model. Go fix your diagram first!\n")]
+        (throw (Exception. msg))))
 
+    (info "Creating the workflow and catalog")
     {:workflow (mapv (fn [{:keys [from to]}]
                        [(lookup-box from) (lookup-box to)])
                      arrows)
@@ -81,32 +89,8 @@
                                   (and (not-empty f) (empty? t)) (create-catalog box))))
                     boxes)}))
 
-(defn create-model-workflow [pre-model]
-  (:workflow pre-model))
-
-(defn create-model-catalog [pre-model]
-  (:catalog pre-model))
-
-;; (defn create-model [workflow catalog model-name ns-name]
-;;   (defmodel model-name
-;;     "Defines the model"
-;;     {:witan/name (keyword (str ns-name "/" model-name))
-;;      :witan/version "1.0.0"}
-;;     {:workflow workflow
-;;      :catalog catalog}))
-
-
-(comment
-
-  (clojure.pprint/pprint (parse-xml-model "dev-resources/test-diagram.xml"))
-
-  (-> (parse-xml-model "dev-resources/test-diagram.xml")
+(defn -main
+  [xml-model-diagram]
+  (-> (parse-xml-model xml-model-diagram)
       create-pre-model
-      clojure.pprint/pprint)
-
-  (def pre-model (create-pre-model (parse-xml-model "dev-resources/test-diagram.xml")))
-
-  (def catalog (create-model-catalog pre-model))
-  (def workflow (create-model-workflow pre-model))
-  ;;(create-model workflow catalog "test-model" "test-ns")
-  )
+      clojure.pprint/pprint))
