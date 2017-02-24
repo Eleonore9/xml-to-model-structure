@@ -29,13 +29,13 @@ To create a model diagram using [draw.io](https://www.draw.io/) export it as an 
 
 Work in progress to reach the MVP1 milestone:
 
-* User can produces a "pre model" (a workflow + a catalog) for a basic diagram.
+* User can produce a "pre model" (a workflow + a catalog) for a basic diagram.
 
-* User get an error (with a descriptive message) if the diagram file is broken and can't be used as such.
+* User gets an error (with a descriptive message) if the diagram file is broken and thus can't be used.
 
 ## Description
 
-You can create a diagram/flowchart for a model using [draw.io](https://www.draw.io/) and export it as XML (don't compressing it).
+You can create a diagram/flowchart for a model using [draw.io](https://www.draw.io/) and export it as XML (don't compress it).
 
 Example of a model diagram/flowchart:
 ![basic-model-diagram](img/test-diagram5.png)
