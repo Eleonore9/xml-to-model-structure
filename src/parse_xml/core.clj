@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.data.xml :as xml]
             [clojure.string :as s]
-            [taoensso.timbre :as timbre :refer [info]])
+            [taoensso.timbre :as timbre :refer [info]]
+            [clojure.java.shell :refer [sh with-sh-dir]])
   (:gen-class))
 
 (defn clean-text
@@ -88,6 +89,13 @@
                                   (and (empty? f) (not-empty t)) (create-catalog box t)
                                   (and (not-empty f) (empty? t)) (create-catalog box))))
                     boxes)}))
+
+(defn create-model-project
+  "Create a Leiningen project for the model.
+   Takes in a directory where the project will be created,
+   and the name for this new project."
+  [project-dirpath project-name]
+  (sh "lein" "new" project-name))
 
 (defn -main
   [xml-model-diagram]
