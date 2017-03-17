@@ -1,6 +1,6 @@
 # parse-xml
 
-[![Build Status](https://travis-ci.org/Eleonore9/xml-to-model-structure.svg?branch=master)](https://travis-ci.org/Eleonore9/xml-to-model-structure)
+[![Build Status](https://travis-ci.org/Eleonore9/xml-to-model-structure.svg?branch=master)](https://travis-ci.org/Eleonore9/xml-to-model-structure) [![Stories in progress](https://badge.waffle.io/Eleonore9/xml-to-model-structure.svg?label=in%20progress&title=In%20progress)](http://waffle.io/Eleonore9/xml-to-model-structure)
 
 ## Table of contents
 
@@ -33,6 +33,8 @@ Work in progress to reach the MVP1 milestone:
 
 * User gets an error (with a descriptive message) if the diagram file is broken and thus can't be used.
 
+* User can produce a new Clojure project with new namespaces needed to create a model.
+
 ## Description
 
 You can create a diagram/flowchart for a model using [draw.io](https://www.draw.io/) and export it as XML (don't compress it).
@@ -64,6 +66,23 @@ If the arrows in the diagram aren't connected to a box, then we can't automate t
 ```
 "!DANGER! The flowchart has 1 disconnected arrows.
 You CANNOT proceed with creating a model. Go fix your diagram first!"
+```
+
+You can create a new model project from the repl:
+
+```Clojure
+(create-model-project "/home/eleonore/Documents/" "my-model")
+```
+This outputs the following messages:
+
+```
+17-03-17 17:02:00 eleonore INFO [parse-xml.core:105] - Creating a new Clojure project my-model at /home/eleonore/Documents/ ...
+17-03-17 17:02:02 eleonore INFO [parse-xml.core:107] - Creating a 'model.clj' namespace to define the model.
+17-03-17 17:02:02 eleonore INFO [parse-xml.core:109] - Creating a 'schemas.clj' namespace to define the data schemas.
+17-03-17 17:02:02 eleonore INFO [parse-xml.core:111] - Creating a 'model_test.clj' namespace to validate the model.
+17-03-17 17:02:02 eleonore INFO [parse-xml.core:114] - Creating a 'workspace_test.clj' namespace to test the model can be run.
+{:exit 0, :out "", :err ""}
+
 ```
 
 ## License

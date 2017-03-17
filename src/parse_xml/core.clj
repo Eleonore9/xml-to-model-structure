@@ -114,7 +114,6 @@
     (info "Creating a 'workspace_test.clj' namespace to test the model can be run.")
     (sh "touch" "workspace_test.clj" :dir (io/file test-path "acceptance"))))
 
-
 (defn -main
   [xml-model-diagram]
   (-> (parse-xml-model xml-model-diagram)
