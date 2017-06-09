@@ -113,9 +113,10 @@
                                                                   [['witan.workspace-executor "0.2.6"
                                                                     :exclusions
                                                                     ['witan.workspace-api]]]})))))
-                                 (into ()))]
+                                 (into ())
+                                 reverse)]
     (with-open [writer (io/writer (io/file project-file))]
-      (.write writer (str new-project-content)) )))
+      (.write writer (with-out-str (clojure.pprint/pprint new-project-content))) )))
 
 (defn update-model-file [model-file project-data project-name]
   (let [model-name (s/join "-" [project-name "model"])
