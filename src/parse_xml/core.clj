@@ -93,71 +93,25 @@
                     boxes)}))
 
 ;; Create the model in a new project directory
-(defn read-file [file-path]
-  (clojure.edn/read-string (slurp (io/file file-path))))
-
-(defn update-project-file [project-file]
-  (let [project-content (read-file project-file)
-        new-project-content (->> (-> (into [] project-content)
-                                     (update
-                                      (inc (.indexOf project-content :dependencies))
-                                      (fn [deps-vec] (apply conj deps-vec
-                                                            ['witan.workspace-api "0.1.22"]
-                                                            [['net.mikera/core.matrix "0.55.0"]])))
-                                     (as-> proj (update proj
-                                                        (inc (.indexOf proj :profiles))
-                                                        (fn [profiles]
-                                                          (assoc profiles
-                                                                 :dev
-                                                                 {:dependencies
-                                                                  [['witan.workspace-executor "0.2.6"
-                                                                    :exclusions
-                                                                    ['witan.workspace-api]]]})))))
-                                 (into ())
-                                 reverse)]
-    (with-open [writer (io/writer (io/file project-file))]
-      (.write writer (with-out-str (clojure.pprint/pprint new-project-content))) )))
-
-(defn update-model-file [model-file project-data project-name]
-  (let [model-name (s/join "-" [project-name "model"])
-        model-metadata {:witan/name (keyword (s/join "/" [project-name model-name]))
-                        :witan/version "1.0.0"}
-        model-content `("defmodel" ~model-name
-                         ~model-metadata
-                         ~project-data)]
-    (with-open [writer (io/writer (io/file model-file) :append true)]
-      (.write writer (str '(ns witan.send.model
-                             (:require [witan.workspace-api :refer [defmodel]]
-                                       [witan.workspace-api.protocols :as p]
-                                       [witan.workspace-api.utils :refer [map-fn-meta
-                                                                          map-model-meta]]))))
-      (.write writer (str model-content)))))
+(defn update-model-file
+  [model-file project-data]
+  (let [original-content (with-open [reader (io/reader (io/file model-file))]
+                           (slurp reader))
+        updated-content (->  original-content
+                             (s/replace #"model-workflow" (str (:workflow project-data)))
+                             (s/replace #"model-catalog" (str (:catalog project-data))))]
+    (with-open [writer (io/writer (io/file model-file) :append false)]
+      (.write writer updated-content))))
 
 (defn create-model-project
-  "Create a Leiningen project for the model.
-   Takes in a directory where the project will be created,
-   and the name for this new project."
+  "Creates a witan model project using the template."
   [project-data project-dirpath project-name]
   (let [src-path (io/file project-dirpath project-name "src/"
-                          (s/replace project-name #"-" "_"))
-        test-path (io/file project-dirpath project-name "test/"
-                           (s/replace project-name #"-" "_"))]
-    (clojure.pprint/pprint project-data)
-    (info "Creating a new Clojure project" project-name "at" project-dirpath "...")
-    (sh "lein" "new" "app" project-name :dir (io/file project-dirpath))
-    (update-project-file (io/file project-dirpath project-name "project.clj"))
-    (info "Creating a 'model.clj' namespace to define the model.")
-    (sh "touch" "model.clj" :dir src-path)
-    (update-model-file (io/file src-path "model.clj")
-                       project-data project-name)
-    (info "Creating a 'schemas.clj' namespace to define the data schemas.")
-    (sh "touch" "schemas.clj" :dir src-path)
-    (info "Creating a 'model_test.clj' namespace to validate the model.")
-    (sh "touch" "model_test.clj" :dir test-path)
-    (sh "mkdir" (str test-path "/acceptance/"))
-    (info "Creating a 'workspace_test.clj' namespace to test the model can be run.")
-    (sh "touch" "workspace_test.clj" :dir (io/file test-path "acceptance"))))
-
+                          (s/replace project-name #"-" "_"))]
+    (clojure.pprint/pprint project-data) ;; FOR TESTING
+    (info "Creating a new witan-model project" project-name "at" project-dirpath "...")
+    (sh "lein" "new" "witan-model" project-name :dir (io/file project-dirpath))
+    (update-model-file (io/file src-path "model.clj") project-data)))
 
 (defn -main
   [xml-model-diagram project-path project-name]
@@ -165,4 +119,4 @@
       create-pre-model
       (create-model-project project-path project-name)))
 
-(comment (-main "dev-resources/test-diagram5.xml" "/home/eleonore/Documents/" "offsite-test"))
+(comment (-main "dev-resources/test-diagram5.xml" "/home/eleonore/Documents/" "my-model"))
