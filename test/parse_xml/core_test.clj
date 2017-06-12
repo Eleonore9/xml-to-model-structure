@@ -1,6 +1,8 @@
 (ns parse-xml.core-test
   (:require [clojure.test :refer :all]
-            [parse-xml.core :refer :all]))
+            [parse-xml.core :refer :all]
+            [me.raynes.fs :as fs]
+            [clojure.java.io :as io]))
 
 (deftest parse-xml-model-test
   (testing "The fn can identify all elements of the xml diagram"
@@ -38,3 +40,31 @@
                           (create-pre-model
                            (parse-xml-model
                             "dev-resources/test-diagram5-broken.xml"))))))
+
+(deftest create-model-project-test
+  (testing "The function creates a project at the right location with the namespaces needed."
+    (let [model-data {:workspace [[:a :b] [:b :c]]
+                      :catalog [{:witan/name :a
+                                 :witan/version "1.0.0"
+                                 :witan/type :input
+                                 :witan/fn :model
+                                 :witan/params ""}
+                                {:witan/name :b
+                                 :witan/version "1.0.0"
+                                 :witan/type :function
+                                 :witan/fn :model}
+                                {:witan/name :c
+                                 :witan/version "1.0.0"
+                                 :witan/type :output
+                                 :witan/fn :model}]}
+          target-dir (fs/temp-dir "tmp")
+          _ (create-model-project model-data target-dir "test-model")]
+      (is (fs/exists? (io/file target-dir "test-model")))
+      (is (every? fs/exists? [(io/file target-dir "test-model" "src/test_model/core.clj")
+                              (io/file target-dir "test-model" "src/test_model/model.clj")
+                              (io/file target-dir "test-model" "src/test_model/schemas.clj")
+                              (io/file target-dir "test-model" "test/test_model/test_utils.clj")
+                              (io/file target-dir "test-model" "test/test_model/core_test.clj")
+                              (io/file target-dir "test-model" "test/test_model/model_test.clj")
+                              (io/file target-dir "test-model"
+                                       "test/test_model/acceptance/workspace_test.clj")])))))
