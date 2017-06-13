@@ -108,7 +108,6 @@
   [project-data project-dirpath project-name]
   (let [src-path (io/file project-dirpath project-name "src/"
                           (s/replace project-name #"-" "_"))]
-    (clojure.pprint/pprint project-data) ;; FOR TESTING
     (info "Creating a new witan-model project" project-name "at" project-dirpath "...")
     (sh "lein" "new" "witan-model" project-name :dir (io/file project-dirpath))
     (update-model-file (io/file src-path "model.clj") project-data)))
