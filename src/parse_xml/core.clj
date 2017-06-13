@@ -93,29 +93,29 @@
                     boxes)}))
 
 ;; Create the model in a new project directory
+(defn update-model-file
+  [model-file project-data]
+  (let [original-content (with-open [reader (io/reader (io/file model-file))]
+                           (slurp reader))
+        updated-content (->  original-content
+                             (s/replace #"model-workflow" (str (:workflow project-data)))
+                             (s/replace #"model-catalog" (str (:catalog project-data))))]
+    (with-open [writer (io/writer (io/file model-file) :append false)]
+      (.write writer updated-content))))
+
 (defn create-model-project
-  "Create a Leiningen project for the model.
-   Takes in a directory where the project will be created,
-   and the name for this new project."
-  [project-dirpath project-name]
+  "Creates a witan model project using the template."
+  [project-data project-dirpath project-name]
   (let [src-path (io/file project-dirpath project-name "src/"
-                          (s/replace project-name #"-" "_"))
-        test-path (io/file project-dirpath project-name "test/"
-                           (s/replace project-name #"-" "_"))]
-    (info "Creating a new Clojure project" project-name "at" project-dirpath "...")
-    (sh "lein" "new" "app" project-name :dir (io/file project-dirpath))
-    (info "Creating a 'model.clj' namespace to define the model.")
-    (sh "touch" "model.clj" :dir src-path)
-    (info "Creating a 'schemas.clj' namespace to define the data schemas.")
-    (sh "touch" "schemas.clj" :dir src-path)
-    (info "Creating a 'model_test.clj' namespace to validate the model.")
-    (sh "touch" "model_test.clj" :dir test-path)
-    (sh "mkdir" (str test-path "/acceptance/"))
-    (info "Creating a 'workspace_test.clj' namespace to test the model can be run.")
-    (sh "touch" "workspace_test.clj" :dir (io/file test-path "acceptance"))))
+                          (s/replace project-name #"-" "_"))]
+    (info "Creating a new witan-model project" project-name "at" project-dirpath "...")
+    (sh "lein" "new" "witan-model" project-name :dir (io/file project-dirpath))
+    (update-model-file (io/file src-path "model.clj") project-data)))
 
 (defn -main
-  [xml-model-diagram]
+  [xml-model-diagram project-path project-name]
   (-> (parse-xml-model xml-model-diagram)
       create-pre-model
-      clojure.pprint/pprint))
+      (create-model-project project-path project-name)))
+
+(comment (-main "dev-resources/test-diagram5.xml" "/home/eleonore/Documents/" "my-model"))
