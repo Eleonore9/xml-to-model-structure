@@ -71,9 +71,9 @@ This is added to a project model using the name you specified ("my-model") and i
 Calling the `-main` function outputs the following messages:
 
 ```
-17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:25] - Parsing the XML from dev-resources/test-diagram5.xml
-17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:82] - Creating the workflow and catalog
-17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:111] - Creating a new witan-model project my-model3 at /home/eleonore/Documents/ ...
+ INFO [parse-xml.core:25] - Parsing the XML from dev-resources/test-diagram5.xml
+ INFO [parse-xml.core:82] - Creating the workflow and catalog
+ INFO [parse-xml.core:111] - Creating a new witan-model project my-model at /home/user/Documents/ ...
 
 ```
 
