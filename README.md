@@ -7,6 +7,7 @@
 * [Aim](#aim)
 * [Glossary](#glossary)
 * [Status](#status)
+* [Contribute](#contribute)
 * [Description](#description)
 
 ## Aim
@@ -35,6 +36,11 @@ Work in progress to reach the MVP1 milestone:
 
 * User can produce a new Clojure project with new namespaces needed to create a model.
 
+## Contribute
+* Source code: [github.com/MastodonC/xml-to-model-structure](https://github.com/MastodonC/xml-to-model-structure)
+* Issue tracker: [https://github.com/Eleonore9/xml-to-model-structure/issues](https://github.com/Eleonore9/xml-to-model-structure/issues)
+* Waffle board: [https://waffle.io/Eleonore9/xml-to-model-structure](https://waffle.io/Eleonore9/xml-to-model-structure)
+
 ## Description
 
 You can create a diagram/flowchart for a model using [draw.io](https://www.draw.io/) and export it as XML (don't compress it).
@@ -45,10 +51,10 @@ Example of a model diagram/flowchart:
 From the repl you can run the main function using the XML file path to create the "pre model":
 
 ```Clojure
-(-main "dev-resources/test-diagram5.xml")))
+(-main "dev-resources/test-diagram5.xml" "/home/user/Documents/" "my-model")))
 ```
 
-This outputs a data structure containing the model workflow (steps of the model), and catalog (metadata for each step of the model):
+This prints a data structure containing the model workflow (steps of the model), and catalog (metadata for each step of the model):
 
 ```Clojure
 {:workflow [[:input-dataset :group-by-year]
@@ -60,29 +66,23 @@ This outputs a data structure containing the model workflow (steps of the model)
            {:witan/name :output-new-dataset :witan/version "1.0.0"
             :witan/type :output :witan/fn :model/output-new-dataset}]}
 ```
+This is added to a project model using the name you specified ("my-model") and in the directory you specified ("/home/user/Documents/").
 
+Calling the `-main` function outputs the following messages:
+
+```
+17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:25] - Parsing the XML from dev-resources/test-diagram5.xml
+17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:82] - Creating the workflow and catalog
+17-06-15 16:26:35 eleonore-XPS13-9333 INFO [parse-xml.core:111] - Creating a new witan-model project my-model3 at /home/eleonore/Documents/ ...
+
+```
+
+**Note**
 If the arrows in the diagram aren't connected to a box, then we can't automate the creation of a model and this error message is returned:
 
 ```
 "!DANGER! The flowchart has 1 disconnected arrows.
 You CANNOT proceed with creating a model. Go fix your diagram first!"
-```
-
-You can create a new model project from the repl:
-
-```Clojure
-(create-model-project "/home/eleonore/Documents/" "my-model")
-```
-This outputs the following messages:
-
-```
-17-03-17 17:02:00 eleonore INFO [parse-xml.core:105] - Creating a new Clojure project my-model at /home/eleonore/Documents/ ...
-17-03-17 17:02:02 eleonore INFO [parse-xml.core:107] - Creating a 'model.clj' namespace to define the model.
-17-03-17 17:02:02 eleonore INFO [parse-xml.core:109] - Creating a 'schemas.clj' namespace to define the data schemas.
-17-03-17 17:02:02 eleonore INFO [parse-xml.core:111] - Creating a 'model_test.clj' namespace to validate the model.
-17-03-17 17:02:02 eleonore INFO [parse-xml.core:114] - Creating a 'workspace_test.clj' namespace to test the model can be run.
-{:exit 0, :out "", :err ""}
-
 ```
 
 ## License
